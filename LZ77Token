@@ -1,0 +1,62 @@
+#include <stdio.h>
+#include <string.h>
+
+typedef struct {
+    int offset; // Deslocamento em relação à posição atual
+    int length; // Comprimento da correspondência encontrada
+    char next;  // Próximo caractere após a correspondência
+} LZ77Token;
+
+void lz77_encode(const char *input) {
+    int input_length = strlen(input);
+    int position = 0;
+
+    printf("Resultado: ");
+
+    while (position < input_length) {
+        int best_offset = 0, best_length = 0;
+        char next_char = input[position];
+
+        // Busca a melhor correspondência na sequência
+        for (int search_position = 0; search_position < position; ++search_position) {
+            int match_length = 0;
+
+            while (match_length + position < input_length &&
+                   input[search_position + match_length] == input[position + match_length]) {
+                match_length++;
+            }
+
+            if (match_length > best_length) {
+                best_length = match_length;
+                best_offset = position - search_position;
+
+                if (position + match_length < input_length) {
+                    next_char = input[position + match_length];
+                } else {
+                    next_char = '\0';
+                }
+            }
+        }
+
+        // Imprime o token LZ77
+        printf("(%d,%d,%c)", best_offset, best_length, next_char);
+
+        // Avança a posição de acordo com o comprimento da correspondência + 1 caractere
+        position += best_length + 1;
+    }
+
+    printf("\n");
+}
+
+int main() {
+    char input[256];
+
+    printf("Digite a sequência a ser codificada (números ou letras): ");
+    scanf("%255s", input);
+
+    printf("Sequência original: %s\n", input);
+
+    lz77_encode(input);
+
+    return 0;
+}
